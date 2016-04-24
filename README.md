@@ -5,7 +5,7 @@ System requirement
 --------------------------------
 OS：Linux
 
-Python >= 2.6
+Python >= 2.7
 
 psycopg2
 
