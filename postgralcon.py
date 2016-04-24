@@ -21,6 +21,7 @@ debug = False
 timestamp = int(time.time())
 falconAgentUrl = 'http://127.0.0.1:1988/v1/push'
 Step = 60
+Metric = postgresql
 #send data when error happened
 alwaysSend = True
 defaultDataWhenFailed = -1
@@ -100,7 +101,7 @@ class Postgralcon:
 
     def newFalconData(self,key,val,CounterType = 'GAUGE',TAGS = None):
         return {
-                'Metric': '%s.%s' % ('postgresql.', key),
+                'Metric': '%s.%s' % (Metric, key),
                 'Endpoint': socket.gethostname(),
                 'Timestamp': timestamp,
                 'Step': Step,
@@ -118,11 +119,11 @@ class Postgralcon:
         return self.newFalconData(key='database_size',val=v);
     
     def get_blocked(self):
-        sql = 'SELECT bl.pid AS blocked_pid, a.usename AS blocked_user, kl.pid AS blocking_pid, ka.usename AS blocking_user, a.query AS blocked_statement FROM pg_locks bl'
+        sql = 'SELECT count(*) FROM pg_locks bl'
         sql += ' JOIN pg_stat_activity a ON a.pid = bl.pid '
         sql += ' JOIN pg_locks kl ON kl.transactionid = bl.transactionid AND kl.pid != bl.pid '
         sql += ' JOIN pg_stat_activity ka ON ka.pid = kl.pid WHERE NOT bl.granted;'
-        v = self.__get(sql)
+        v = self.__get(sql)[0]
         return self.newFalconData(key='blocked',val=v)
 
 if(debug): 
