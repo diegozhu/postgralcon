@@ -14,14 +14,13 @@ import commands
 import urllib2, base64
 import psycopg2
 import psycopg2.extras
-import importlib 
 import traceback
 
 debug = False
 timestamp = int(time.time())
 falconAgentUrl = 'http://127.0.0.1:1988/v1/push'
 Step = 60
-Metric = postgresql
+Metric = 'postgresql'
 #send data when error happened
 alwaysSend = True
 defaultDataWhenFailed = -1
