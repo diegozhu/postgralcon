@@ -70,11 +70,7 @@ usage:
 3. add this script to crontab using crontab -e
 
 
-Lisence : MIT
---------------------------------
-
 CURRENT STATUS
---------------------------------
 ---------------------------
 | TODO      |  Supoorted  |
 |-----------|-------------|
@@ -122,4 +118,7 @@ indexblockshit||
 toastblocksread||
 toastblockshit||
 toastindexblocks_read||
-toastindexblocks_hit
+toastindexblocks_hit||
+
+Lisence : MIT
+--------------------------------
