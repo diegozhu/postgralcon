@@ -210,7 +210,7 @@ def main():
             if hasattr(monitor, func_name):
                 func = getattr(monitor, func_name)
                 d = func()
-                if(debug)
+                if(debug):
                     print '%s %s' % (key,d['Value'])
                 data.append(d)
             else:
