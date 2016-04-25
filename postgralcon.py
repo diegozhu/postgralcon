@@ -162,7 +162,7 @@ def main():
     except getopt.GetoptError:
         usage()
 
-    global debug,timestamp,falconAgentUrl,Step,Metric,alwaysSend,defaultDataWhenFailed,host,port,user,pswd,db,endPoint
+    global debug,timestamp,falconAgentUrl,step,metric,alwaysSend,defaultDataWhenFailed,host,port,user,pswd,db,endPoint
     for opt, arg in opts:
         if opt in ('-H','--help'):
             usage()
@@ -198,7 +198,7 @@ def main():
             pswd = arg
         elif opt == '-D':
             debug = arg.lower() == 'true' and True or False
-    print '[postgralcon]%s@%s:%s/%s %s %s' %(user,host,port,db,falconAgentUrl,Metric)
+    print '[postgralcon]%s@%s:%s/%s %s %s' %(user,host,port,db,falconAgentUrl,metric)
     if(debug): 
         print "psycopg2 version: "+psycopg2.__version__
     data = []
