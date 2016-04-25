@@ -130,9 +130,6 @@ class Postgralcon:
         v = self.__get(sql)[0]
         return self.newFalconData(key='blocked',val=v)
 
-if(debug): 
-    print "psycopg2 version: "+psycopg2.__version__
-
 def usage():
     print ''
     print 'python postgralcon.py [options]'
@@ -155,7 +152,7 @@ def main():
         usage()
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"t:f:a:v:d:h:u:p:D::e",['--help'])
+        opts, args = getopt.getopt(sys.argv[1:],"t:f:a:v:d:h:u:p:D:e:H:",['--help'])
     except getopt.GetoptError:
         usage()
 
@@ -170,7 +167,7 @@ def main():
         elif opt == '-m':
             Metric = 'postgresql'
         elif opt == '-a':
-            alwaysSend = arg
+            alwaysSend = arg.lower() == 'true' and True or False
         elif opt == '-e':
             endPoint = arg
         elif opt == '-v':
@@ -186,8 +183,10 @@ def main():
         elif opt == '-p':
             pswd = arg
         elif opt == '-D':
-            db = arg
+            debug = arg.lower() == 'true' and True or False
     print '%s@%s:%s/%s %s %s' %(user,host,port,db,falconAgentUrl,Metric)
+    if(debug): 
+        print "psycopg2 version: "+psycopg2.__version__
     data = []
     monitor = Postgralcon()
     for key in Postgralcon.monit_keys:
@@ -208,6 +207,7 @@ def main():
             if(debug):
                 print traceback.format_exc()
             continue
+    #send data
     if(debug): 
         print json.dumps(data, sort_keys=True,indent=4)
     method = "POST"
