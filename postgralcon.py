@@ -93,6 +93,7 @@ class Postgralcon:
     def tryConnect(self):
         if(self.connected):
             return
+        global host,user,pswd,port,db
         self._conn = psycopg2.connect(host=host , user=user, password=pswd , port=port, database=db)
         self._curs = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         self.connected = True
@@ -117,7 +118,8 @@ class Postgralcon:
         return self.newFalconData(key='connections',val=v);
     
     def get_database_size(self):
-        v = self.__get('select pg_database_size(\''+self._db+'\');')[0]
+        global db
+        v = self.__get('select pg_database_size(\''+db+'\');')[0]
         return self.newFalconData(key='database_size',val=v);
     
     def get_blocked(self):
@@ -148,17 +150,18 @@ def usage():
     sys.exit(2)
 
 def main():
+
     if len(sys.argv[1:]) == 0:
         usage()
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"t:f:a:v:d:h:u:p:D:h:e",['--help'])
+        opts, args = getopt.getopt(sys.argv[1:],"t:f:a:v:d:h:u:p:D::e",['--help'])
     except getopt.GetoptError:
         usage()
 
     global debug,timestamp,falconAgentUrl,Step,Metric,alwaysSend,defaultDataWhenFailed,host,port,user,pswd,db
     for opt, arg in opts:
-        if opt in ('-h','--help'):
+        if opt in ('-H','--help'):
             usage()
         if opt == '-t':
             Step = arg
