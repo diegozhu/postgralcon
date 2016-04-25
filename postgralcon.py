@@ -103,6 +103,7 @@ class Postgralcon:
         return self._curs.fetchone()
 
     def newFalconData(self,key,val,CounterType = 'GAUGE',TAGS = None):
+        global endPoint,Step
         return {
                 'Metric': '%s.%s' % (Metric, key),
                 'Endpoint': endPoint,
@@ -156,7 +157,7 @@ def main():
     except getopt.GetoptError:
         usage()
 
-    global debug,timestamp,falconAgentUrl,Step,Metric,alwaysSend,defaultDataWhenFailed,host,port,user,pswd,db
+    global debug,timestamp,falconAgentUrl,Step,Metric,alwaysSend,defaultDataWhenFailed,host,port,user,pswd,db,endPoint
     for opt, arg in opts:
         if opt in ('-H','--help'):
             usage()
