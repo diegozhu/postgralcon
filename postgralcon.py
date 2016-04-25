@@ -102,7 +102,7 @@ class Postgralcon:
         self._curs.execute(sql)
         return self._curs.fetchone()
 
-    def newFalconData(self,key,val,CounterType = 'GAUGE',TAGS = None):
+    def newFalconData(self,key,val,CounterType = 'GAUGE',TAGS = ''):
         global endPoint,Step
         return {
                 'Metric': '%s.%s' % (Metric, key),
