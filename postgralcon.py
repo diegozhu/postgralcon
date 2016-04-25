@@ -20,8 +20,8 @@ import traceback
 debug = False
 timestamp = int(time.time())
 falconAgentUrl = 'http://127.0.0.1:1988/v1/push'
-Step = 60
-Metric = 'postgresql'
+step = 60
+metric = 'postgresql'
 #send data when error happened
 alwaysSend = True
 defaultDataWhenFailed = -1
@@ -103,12 +103,12 @@ class Postgralcon:
         return self._curs.fetchone()
 
     def newFalconData(self,key,val,CounterType = 'GAUGE',TAGS = ''):
-        global endPoint,Step
+        global endPoint,step,metric
         return {
-                'Metric': '%s.%s' % (Metric, key),
+                'Metric': '%s.%s' % (metric, key),
                 'Endpoint': endPoint,
                 'Timestamp': timestamp,
-                'Step': Step,
+                'Step': step,
                 'Value': val,
                 'CounterType': CounterType,
                 'TAGS': TAGS
@@ -130,6 +130,11 @@ class Postgralcon:
         sql += ' JOIN pg_stat_activity ka ON ka.pid = kl.pid WHERE NOT bl.granted;'
         v = self.__get(sql)[0]
         return self.newFalconData(key='blocked',val=v)
+
+def checkNotNull(v,msg):
+    if(v in ('',None)):
+        print '%s is empty!' % (msg)
+        sys.exit(2)
 
 def usage():
     print ''
@@ -162,19 +167,27 @@ def main():
         if opt in ('-H','--help'):
             usage()
         if opt == '-t':
-            Step = arg
+            try:
+                step = int(arg)
+            except Exception:
+                print e
+                sys.exit(2)
         elif opt == '-f':
             falconAgentUrl = arg
         elif opt == '-m':
-            Metric = 'postgresql'
+            metric = 'postgresql'
         elif opt == '-a':
             alwaysSend = arg.lower() == 'true' and True or False
         elif opt == '-e':
             endPoint = arg
         elif opt == '-v':
-            defaultDataWhenFailed = arg
+            try:
+                defaultDataWhenFailed = int(arg)
+            except Exception:
+                print e
+                sys.exit(2)       
         elif opt == '-h':
-            if arg.find(":") == -1:
+            if(arg.find(":") == -1):
                 print 'illegel param -h %s , should be host:port' % (arg)
                 sys.exit(2)
             host = arg.split(':')[0]
@@ -197,10 +210,12 @@ def main():
             if hasattr(monitor, func_name):
                 func = getattr(monitor, func_name)
                 d = func()
-                print '%s %s' % (key,d['Value'])
+                if(debug)
+                    print '%s %s' % (key,d['Value'])
                 data.append(d)
             else:
-                print'[not supportted yet]'+key
+                if(debug):
+                    print'[not supportted yet]'+key
         except Exception, e:
             print '%s %s' % ('[error happened]' , key)
             if(alwaysSend):
