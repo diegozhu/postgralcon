@@ -10,6 +10,7 @@ import socket
 import os
 import re
 import sys
+import getopt
 import commands
 import urllib2, base64
 import psycopg2
@@ -24,13 +25,15 @@ Metric = 'postgresql'
 #send data when error happened
 alwaysSend = True
 defaultDataWhenFailed = -1
+host = '127.0.0.1'
+port = '5432'
+user = 'postgres'
+pswd = 'postgres'
+db = 'postgres'
+endPoint = socket.gethostname()
 
 class Postgralcon:
-    _host = '127.0.0.1'
-    _port = '5432'
-    _user = 'postgres'
-    _pass = 'postgres'
-    _db = 'postgres'
+
     _conn = None
     _curs = None
 
@@ -90,7 +93,7 @@ class Postgralcon:
     def tryConnect(self):
         if(self.connected):
             return
-        self._conn = psycopg2.connect(host=self._host , user=self._user, password=self._pass , port=self._port, database=self._db)
+        self._conn = psycopg2.connect(host=host , user=user, password=pswd , port=port, database=db)
         self._curs = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         self.connected = True
          
@@ -101,7 +104,7 @@ class Postgralcon:
     def newFalconData(self,key,val,CounterType = 'GAUGE',TAGS = None):
         return {
                 'Metric': '%s.%s' % (Metric, key),
-                'Endpoint': socket.gethostname(),
+                'Endpoint': endPoint,
                 'Timestamp': timestamp,
                 'Step': Step,
                 'Value': val,
@@ -128,7 +131,60 @@ class Postgralcon:
 if(debug): 
     print "psycopg2 version: "+psycopg2.__version__
 
+def usage():
+    print ''
+    print 'python postgralcon.py [options]'
+    print ''
+    print '    -a always send if failed collectting data , kind of falcon nodata , default True'
+    print '    -D debug , default False'
+    print '    -v default data when failed , default -1'
+    print '    -t time-interval , default 60 in second'
+    print '    -f falcon-agent-push-url , default http://127.0.0.1:1988/v1/push'
+    print '    -m metric , default postgresql'
+    print '    -h host:port , default 127.0.0.1:5432'
+    print '    -u database user , default postgresql'
+    print '    -p database password , default postgresql'
+    print '    -e end point , default hostname'
+    sys.exit(2)
+
 def main():
+    if len(sys.argv[1:]) == 0:
+        usage()
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],"t:f:a:v:d:h:u:p:D:h:e",['--help'])
+    except getopt.GetoptError:
+        usage()
+
+    global debug,timestamp,falconAgentUrl,Step,Metric,alwaysSend,defaultDataWhenFailed,host,port,user,pswd,db
+    for opt, arg in opts:
+        if opt in ('-h','--help'):
+            usage()
+        if opt == '-t':
+            Step = arg
+        elif opt == '-f':
+            falconAgentUrl = arg
+        elif opt == '-m':
+            Metric = 'postgresql'
+        elif opt == '-a':
+            alwaysSend = arg
+        elif opt == '-e':
+            endPoint = arg
+        elif opt == '-v':
+            defaultDataWhenFailed = arg
+        elif opt == '-h':
+            if arg.find(":") == -1:
+                print 'illegel param -h %s , should be host:port' % (arg)
+                sys.exit(2)
+            host = arg.split(':')[0]
+            port = arg.split(':')[1]
+        elif opt == '-u':
+            user = arg
+        elif opt == '-p':
+            pswd = arg
+        elif opt == '-D':
+            db = arg
+    print '%s@%s:%s/%s %s %s' %(user,host,port,db,falconAgentUrl,Metric)
     data = []
     monitor = Postgralcon()
     for key in Postgralcon.monit_keys:
@@ -168,7 +224,4 @@ def main():
     else:
         print '{"err":1,"msg":"%s"}' % connection
 
-if __name__ == '__main__':
-    proc = commands.getoutput(' ps -ef|grep %s|grep -v grep|wc -l ' % os.path.basename(sys.argv[0]))
-    if int(proc) < 5:
-        main()
+main()
