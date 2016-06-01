@@ -131,6 +131,135 @@ class Postgralcon:
         v = self.__get(sql)[0]
         return self.newFalconData(key='blocked',val=v)
 
+    def get_commits(self):
+        global db
+        v = self.__get('select xact_commit from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='commits', val=v)
+
+    def get_rollbacks(self):
+        global db
+        v = self.__get('select xact_rollback from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='rollbacks', val=v)
+
+    def get_disk_read(self):
+        global db
+        v = self.__get('select blks_read from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='disk_read', val=v)
+
+    def get_buffer_hit(self):
+        global db
+        v = self.__get('select blks_hit from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='buffer_hit', val=v)
+
+    def get_rows_returned(self):
+        global db
+        v = self.__get('select tup_returned from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='rows_returned', val=v)
+
+    def get_rows_fetched(self):
+        global db
+        v = self.__get('select tup_fetched from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='rows_fetched', val=v)
+
+    def get_rows_inserted(self):
+        global db
+        v = self.__get('select tup_inserted from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='rows_inserted', val=v)
+
+    def get_rows_updated(self):
+        global db
+        v = self.__get('select tup_updated from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='rows_updated', val=v)
+
+    def get_rows_deleted(self):
+        global db
+        v = self.__get('select tup_deleted from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='rows_deleted', val=v)
+
+    def get_temp_bytes(self):
+        global db
+        v = self.__get('select temp_bytes from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='temp_bytes', val=v)
+
+    def get_temp_files(self):
+        global db
+        v = self.__get('select temp_files from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='temp_files', val=v)
+
+
+
+    def get_deadlocks(self):
+        global db
+        v = self.__get('select deadlocks from pg_stat_database where datname=\'' + db + '\';')[0]
+        return self.newFalconData(key='deadlocks', val=v)
+
+    def get_bgwriter_checkpoints_timed(self):
+        v = self.__get('select checkpoints_timed from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_checkpoints_timed', val=v)
+
+    def get_bgwriter_checkpoints_requested(self):
+        v = self.__get('select checkpoints_req from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_checkpoints_requested', val=v)
+
+    def get_bgwriter_buffers_checkpoint(self):
+        v = self.__get('select buffers_checkpoint from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_buffers_checkpoint', val=v)
+
+    def get_bgwriter_buffers_clean(self):
+        v = self.__get('select buffers_clean from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_buffers_clean', val=v)
+
+    def get_bgwriter_maxwritten_clean(self):
+        v = self.__get('select maxwritten_clean from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_maxwritten_clean', val=v)
+
+    def get_bgwriter_buffers_backend(self):
+        v = self.__get('select buffers_backend from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_buffers_backend', val=v)
+
+    def get_bgwriter_buffers_alloc(self):
+        v = self.__get('select buffers_alloc from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_buffers_alloc', val=v)
+
+    def get_bgwriter_buffersbackendfsync(self):
+        v = self.__get('select buffers_backend_fsync from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_buffersbackendfsync', val=v)
+
+    def get_bgwriter_write_time(self):
+        v = self.__get('select checkpoint_write_time from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_write_time', val=v)
+
+    def get_bgwriter_sync_time(self):
+        v = self.__get('select checkpoint_sync_time from pg_stat_bgwriter;')[0]
+        return self.newFalconData(key='bgwriter_sync_time', val=v)
+
+    def get_locks(self):
+        v = self.__get('select count(*) from pg_locks;')[0]
+        return self.newFalconData(key='locks', val=v)
+
+
+    def get_sql_by_exec_time(self):
+        sql = 'SELECT calls, total_time, rows, 100.0 * shared_blks_hit /nullif(shared_blks_hit + shared_blks_read, 0) AS hit_percent,substr(query,1,25)'
+        sql += 'FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;'
+        v = self.__get_many(sql)
+        return self.newFalconData(key='sql_by_exec_time', val=v)
+
+    # def get_table_in_buffers(self):
+    #     sql = 'SELECT c.relname, count(*) AS buffers'
+    #     sql += 'FROM pg_buffercache b INNER JOIN pg_class c ON b.relfilenode = pg_relation_filenode(c.oid)'
+    #     sql += ' AND b.reldatabase IN (0, (SELECT oid FROM pg_database WHERE datname = current_database())) GROUP BY c.relname ORDER BY 2 DESC LIMIT 5;'
+    #     v = self.__get(sql)[0]
+    #     return self.newFalconData(key='table_in_buffers', val=v)
+
+    def get_repl_state(self):
+        v = self.__get('select state from pg_stat_replication;')
+        return self.newFalconData(key='repl_state', val=v)
+
+    def get_sync_state(self):
+        v = self.__get('select sync_state from pg_stat_replication;')
+        return self.newFalconData(key='sync_state', val=v)
+
+
 def checkNotNull(v,msg):
     if(v in ('',None)):
         print '%s is empty!' % (msg)
